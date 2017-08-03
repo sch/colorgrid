@@ -3,16 +3,30 @@ defmodule Colorgrid do
   Documentation for Colorgrid.
   """
 
-  @doc """
-  Hello world.
+  use Application
 
-  ## Examples
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
 
-      iex> Colorgrid.hello
-      :world
+    children = [
+      Plug.Adapters.Cowboy.child_spec(:http, Colorgrid.Router, [], [
+        dispatch: dispatch()
+      ])
+    ]
 
-  """
-  def hello do
-    :world
+    opts = [strategy: :one_for_one, name: Colorgrid.Supervisor]
+
+    Supervisor.start_link(children, opts)
+  end
+
+  defp dispatch do
+    [
+      {:_, [
+        # route the /ws endpoint to our cowboy websocket handler
+        {"/ws", Colorgrid.SocketHandler, []},
+        # ... but then send everything else to plug
+        {:_, Plug.Adapters.Cowboy.Handler, {Colorgrid.Router, []}}
+      ]}
+    ]
   end
 end
