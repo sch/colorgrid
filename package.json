@@ -1,0 +1,11 @@
+{
+  "name": "colorgrid",
+  "scripts": {
+    "start": "elm-live client/Phone.elm --output priv/static/index.html --pushstate --dir=build --host=0.0.0.0 --port=9000 --debug",
+    "build": "elm-make client/Phone.elm --output priv/static/index.html"
+  },
+  "devDependencies": {
+    "elm": "^0.18.0",
+    "elm-live": "^2.7.5"
+  }
+}
