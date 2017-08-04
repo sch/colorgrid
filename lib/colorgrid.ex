@@ -10,7 +10,8 @@ defmodule Colorgrid do
 
     children = [
       Plug.Adapters.Cowboy.child_spec(:http, Colorgrid.Router, [], [
-        dispatch: dispatch()
+        dispatch: dispatch(),
+        ip: {0, 0, 0, 0}
       ])
     ]
 

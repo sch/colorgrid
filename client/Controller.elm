@@ -144,6 +144,39 @@ subscriptions model =
 -- VIEW
 
 
+systemFonts =
+    String.join ", "
+        [ "-apple-system"
+        , "BlinkMacSystemFont"
+        , quote "Segoe UI"
+        , "Roboto"
+        , "Helvetica"
+        , "Arial"
+        , "sans-serif"
+        , quote "Apple Color Emoji"
+        , quote "Segoe UI Emoji"
+        , quote "Segoe UI Symbol"
+        ]
+
+
+systemMonospacedFonts =
+    String.join ", "
+        [ "SFMono-Regular"
+        , quote "SF Mono"
+        , quote "Monaco"
+        , quote "Inconsolata"
+        , quote "Fira Mono"
+        , quote "Droid Sans Mono"
+        , quote "Source Code Pro"
+        , "monospace"
+        ]
+
+
+quote : String -> String
+quote str =
+    "\"" ++ str ++ "\""
+
+
 view : Model -> Html Msg
 view model =
     div
@@ -157,6 +190,7 @@ view model =
             , ( "display", "flex" )
             , ( "align-items", "center" )
             , ( "justify-content", "center" )
+            , ( "font-family", systemFonts )
             ]
         ]
         [ viewConnections model, viewHsl model ]
@@ -167,6 +201,7 @@ viewHsl model =
     div
         [ style
             [ ( "background-color", "rgba(255, 255, 255, 0.2)" )
+            , ( "font-size", "200%" )
             , ( "color", "#333" )
             , ( "padding", "20px 30px" )
             , ( "border-radius", "3px" )
@@ -190,7 +225,7 @@ viewConnections { connectedUsers, lastResponse } =
             [ style
                 [ ( "background-color", "black" )
                 , ( "color", "white" )
-                , ( "font-family", "monospace" )
+                , ( "font-family", systemMonospacedFonts )
                 , ( "position", "absolute" )
                 , ( "padding", "10px" )
                 , ( "top", "0" )
