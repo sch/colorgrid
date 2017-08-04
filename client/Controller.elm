@@ -4,7 +4,6 @@ import Color exposing (Color)
 import Color.Convert exposing (colorToHex, colorToCssHsl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Mouse
 import Task
 import WebSocket
@@ -20,7 +19,6 @@ main =
         }
 
 
-endpoint : String
 endpoint =
     "ws://localhost:4000/ws"
 
@@ -35,6 +33,8 @@ type alias Model =
     , saturation : Float
     , lightness : Float
     , affecting : YAxis
+    , connectedUsers : Int
+    , lastResponse : String
     }
 
 
@@ -52,9 +52,16 @@ init =
             , saturation = 0.5
             , lightness = 0.5
             , affecting = Saturation
+            , connectedUsers = 0
+            , lastResponse = ""
             }
     in
         ( model, Task.perform Resize Window.size )
+
+
+toColor : Model -> Color
+toColor { hue, saturation, lightness } =
+    Color.hsl hue saturation lightness
 
 
 
@@ -65,6 +72,7 @@ type Msg
     = Resize Window.Size
     | MouseMove Mouse.Position
     | ToggleBetweenSaturationAndLightness
+    | ServerMessage String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -77,21 +85,30 @@ update msg model =
             let
                 hue =
                     (toFloat position.x / toFloat model.window.width) * 2 * pi
-            in
-                case model.affecting of
-                    Saturation ->
-                        let
-                            saturation =
-                                1 - (toFloat position.y / toFloat model.window.height)
-                        in
-                            ( { model | hue = hue, saturation = saturation }, Cmd.none )
 
-                    Lightness ->
-                        let
-                            lightness =
-                                1 - (toFloat position.y / toFloat model.window.height)
-                        in
-                            ( { model | hue = hue, lightness = lightness }, Cmd.none )
+                saturation =
+                    if model.affecting == Saturation then
+                        1 - (toFloat position.y / toFloat model.window.height)
+                    else
+                        model.saturation
+
+                lightness =
+                    if model.affecting == Lightness then
+                        1 - (toFloat position.y / toFloat model.window.height)
+                    else
+                        model.lightness
+
+                newModel =
+                    { model
+                        | hue = hue
+                        , lightness = lightness
+                        , saturation = saturation
+                    }
+
+                command =
+                    WebSocket.send endpoint (colorMessage newModel)
+            in
+                ( newModel, command )
 
         ToggleBetweenSaturationAndLightness ->
             case model.affecting of
@@ -100,6 +117,13 @@ update msg model =
 
                 Lightness ->
                     ( { model | affecting = Saturation }, Cmd.none )
+
+        ServerMessage string ->
+            ( { model | lastResponse = string }, Cmd.none )
+
+
+colorMessage model =
+    "color:" ++ (colorToCssHsl <| toColor model)
 
 
 
@@ -112,6 +136,7 @@ subscriptions model =
         [ Window.resizes Resize
         , Mouse.moves MouseMove
         , Mouse.clicks (always ToggleBetweenSaturationAndLightness)
+        , WebSocket.listen endpoint ServerMessage
         ]
 
 
@@ -134,14 +159,14 @@ view model =
             , ( "justify-content", "center" )
             ]
         ]
-        [ viewHsl model ]
+        [ viewConnections model, viewHsl model ]
 
 
 viewHsl : Model -> Html Msg
 viewHsl model =
     div
         [ style
-            [ ( "background-color", "rgba(255, 255, 255, 0.1)" )
+            [ ( "background-color", "rgba(255, 255, 255, 0.2)" )
             , ( "color", "#333" )
             , ( "padding", "20px 30px" )
             , ( "border-radius", "3px" )
@@ -150,6 +175,30 @@ viewHsl model =
         [ text <| colorToCssHsl <| toColor model ]
 
 
-toColor : Model -> Color
-toColor { hue, saturation, lightness } =
-    Color.hsl hue saturation lightness
+viewConnections : Model -> Html Msg
+viewConnections { connectedUsers, lastResponse } =
+    let
+        message =
+            case connectedUsers of
+                1 ->
+                    "1 user is connected"
+
+                _ ->
+                    toString connectedUsers ++ " users are connected"
+    in
+        div
+            [ style
+                [ ( "background-color", "black" )
+                , ( "color", "white" )
+                , ( "font-family", "monospace" )
+                , ( "position", "absolute" )
+                , ( "padding", "10px" )
+                , ( "top", "0" )
+                , ( "left", "0" )
+                , ( "right", "0" )
+                , ( "display", "flex" )
+                ]
+            ]
+            [ span [ style [ ( "flex", "1" ) ] ] [ text message ]
+            , text lastResponse
+            ]

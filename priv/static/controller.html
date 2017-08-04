@@ -12964,120 +12964,6 @@ var _elm_lang$html$Html_Attributes$classList = function (list) {
 				A2(_elm_lang$core$List$filter, _elm_lang$core$Tuple$second, list))));
 };
 var _elm_lang$html$Html_Attributes$style = _elm_lang$virtual_dom$VirtualDom$style;
-var _elm_lang$html$Html_Events$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
-var _elm_lang$html$Html_Events$targetChecked = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'target',
-		_1: {
-			ctor: '::',
-			_0: 'checked',
-			_1: {ctor: '[]'}
-		}
-	},
-	_elm_lang$core$Json_Decode$bool);
-var _elm_lang$html$Html_Events$targetValue = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'target',
-		_1: {
-			ctor: '::',
-			_0: 'value',
-			_1: {ctor: '[]'}
-		}
-	},
-	_elm_lang$core$Json_Decode$string);
-var _elm_lang$html$Html_Events$defaultOptions = _elm_lang$virtual_dom$VirtualDom$defaultOptions;
-var _elm_lang$html$Html_Events$onWithOptions = _elm_lang$virtual_dom$VirtualDom$onWithOptions;
-var _elm_lang$html$Html_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
-var _elm_lang$html$Html_Events$onFocus = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'focus',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onBlur = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'blur',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onSubmitOptions = _elm_lang$core$Native_Utils.update(
-	_elm_lang$html$Html_Events$defaultOptions,
-	{preventDefault: true});
-var _elm_lang$html$Html_Events$onSubmit = function (msg) {
-	return A3(
-		_elm_lang$html$Html_Events$onWithOptions,
-		'submit',
-		_elm_lang$html$Html_Events$onSubmitOptions,
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onCheck = function (tagger) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'change',
-		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetChecked));
-};
-var _elm_lang$html$Html_Events$onInput = function (tagger) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'input',
-		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
-};
-var _elm_lang$html$Html_Events$onMouseOut = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseout',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseOver = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseover',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseLeave = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseleave',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseEnter = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseenter',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseUp = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseup',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseDown = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mousedown',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onDoubleClick = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'dblclick',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onClick = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'click',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$Options = F2(
-	function (a, b) {
-		return {stopPropagation: a, preventDefault: b};
-	});
 var _elm_lang$mouse$Mouse_ops = _elm_lang$mouse$Mouse_ops || {};
 _elm_lang$mouse$Mouse_ops['&>'] = F2(
 	function (t1, t2) {
@@ -14382,9 +14268,100 @@ var _eskimoblood$elm_color_extra$Color_Convert$Lab = F3(
 	function (a, b, c) {
 		return {l: a, a: b, b: c};
 	});
-var _user$project$Main$toColor = function (_p0) {
+var _user$project$Main$viewConnections = function (_p0) {
 	var _p1 = _p0;
-	return A3(_elm_lang$core$Color$hsl, _p1.hue, _p1.saturation, _p1.lightness);
+	var _p3 = _p1.connectedUsers;
+	var message = function () {
+		var _p2 = _p3;
+		if (_p2 === 1) {
+			return '1 user is connected';
+		} else {
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p3),
+				' users are connected');
+		}
+	}();
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$style(
+				{
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'background-color', _1: 'black'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'font-family', _1: 'monospace'},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'position', _1: 'absolute'},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'padding', _1: '10px'},
+									_1: {
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'top', _1: '0'},
+										_1: {
+											ctor: '::',
+											_0: {ctor: '_Tuple2', _0: 'left', _1: '0'},
+											_1: {
+												ctor: '::',
+												_0: {ctor: '_Tuple2', _0: 'right', _1: '0'},
+												_1: {
+													ctor: '::',
+													_0: {ctor: '_Tuple2', _0: 'display', _1: 'flex'},
+													_1: {ctor: '[]'}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$span,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$style(
+						{
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'flex', _1: '1'},
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(message),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(_p1.lastResponse),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _user$project$Main$toColor = function (_p4) {
+	var _p5 = _p4;
+	return A3(_elm_lang$core$Color$hsl, _p5.hue, _p5.saturation, _p5.lightness);
+};
+var _user$project$Main$colorMessage = function (model) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		'color:',
+		_eskimoblood$elm_color_extra$Color_Convert$colorToCssHsl(
+			_user$project$Main$toColor(model)));
 };
 var _user$project$Main$viewHsl = function (model) {
 	return A2(
@@ -14394,7 +14371,7 @@ var _user$project$Main$viewHsl = function (model) {
 			_0: _elm_lang$html$Html_Attributes$style(
 				{
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'background-color', _1: 'rgba(255, 255, 255, 0.1)'},
+					_0: {ctor: '_Tuple2', _0: 'background-color', _1: 'rgba(255, 255, 255, 0.2)'},
 					_1: {
 						ctor: '::',
 						_0: {ctor: '_Tuple2', _0: 'color', _1: '#333'},
@@ -14471,55 +14448,49 @@ var _user$project$Main$view = function (model) {
 		},
 		{
 			ctor: '::',
-			_0: _user$project$Main$viewHsl(model),
-			_1: {ctor: '[]'}
+			_0: _user$project$Main$viewConnections(model),
+			_1: {
+				ctor: '::',
+				_0: _user$project$Main$viewHsl(model),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$Main$endpoint = 'ws://localhost:4000/ws';
-var _user$project$Main$Model = F5(
-	function (a, b, c, d, e) {
-		return {window: a, hue: b, saturation: c, lightness: d, affecting: e};
+var _user$project$Main$Model = F7(
+	function (a, b, c, d, e, f, g) {
+		return {window: a, hue: b, saturation: c, lightness: d, affecting: e, connectedUsers: f, lastResponse: g};
 	});
 var _user$project$Main$Lightness = {ctor: 'Lightness'};
 var _user$project$Main$Saturation = {ctor: 'Saturation'};
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
+		var _p6 = msg;
+		switch (_p6.ctor) {
 			case 'Resize':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{window: _p2._0}),
+						{window: _p6._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'MouseMove':
-				var _p4 = _p2._0;
-				var hue = ((_elm_lang$core$Basics$toFloat(_p4.x) / _elm_lang$core$Basics$toFloat(model.window.width)) * 2) * _elm_lang$core$Basics$pi;
-				var _p3 = model.affecting;
-				if (_p3.ctor === 'Saturation') {
-					var saturation = 1 - (_elm_lang$core$Basics$toFloat(_p4.y) / _elm_lang$core$Basics$toFloat(model.window.height));
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{hue: hue, saturation: saturation}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					var lightness = 1 - (_elm_lang$core$Basics$toFloat(_p4.y) / _elm_lang$core$Basics$toFloat(model.window.height));
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{hue: hue, lightness: lightness}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			default:
-				var _p5 = model.affecting;
-				if (_p5.ctor === 'Saturation') {
+				var _p7 = _p6._0;
+				var lightness = _elm_lang$core$Native_Utils.eq(model.affecting, _user$project$Main$Lightness) ? (1 - (_elm_lang$core$Basics$toFloat(_p7.y) / _elm_lang$core$Basics$toFloat(model.window.height))) : model.lightness;
+				var saturation = _elm_lang$core$Native_Utils.eq(model.affecting, _user$project$Main$Saturation) ? (1 - (_elm_lang$core$Basics$toFloat(_p7.y) / _elm_lang$core$Basics$toFloat(model.window.height))) : model.saturation;
+				var hue = ((_elm_lang$core$Basics$toFloat(_p7.x) / _elm_lang$core$Basics$toFloat(model.window.width)) * 2) * _elm_lang$core$Basics$pi;
+				var newModel = _elm_lang$core$Native_Utils.update(
+					model,
+					{hue: hue, lightness: lightness, saturation: saturation});
+				var command = A2(
+					_elm_lang$websocket$WebSocket$send,
+					_user$project$Main$endpoint,
+					_user$project$Main$colorMessage(newModel));
+				return {ctor: '_Tuple2', _0: newModel, _1: command};
+			case 'ToggleBetweenSaturationAndLightness':
+				var _p8 = model.affecting;
+				if (_p8.ctor === 'Saturation') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -14536,8 +14507,19 @@ var _user$project$Main$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{lastResponse: _p6._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
+var _user$project$Main$ServerMessage = function (a) {
+	return {ctor: 'ServerMessage', _0: a};
+};
 var _user$project$Main$ToggleBetweenSaturationAndLightness = {ctor: 'ToggleBetweenSaturationAndLightness'};
 var _user$project$Main$MouseMove = function (a) {
 	return {ctor: 'MouseMove', _0: a};
@@ -14551,7 +14533,9 @@ var _user$project$Main$init = function () {
 		hue: 0,
 		saturation: 0.5,
 		lightness: 0.5,
-		affecting: _user$project$Main$Saturation
+		affecting: _user$project$Main$Saturation,
+		connectedUsers: 0,
+		lastResponse: ''
 	};
 	return {
 		ctor: '_Tuple2',
@@ -14571,7 +14555,11 @@ var _user$project$Main$subscriptions = function (model) {
 					ctor: '::',
 					_0: _elm_lang$mouse$Mouse$clicks(
 						_elm_lang$core$Basics$always(_user$project$Main$ToggleBetweenSaturationAndLightness)),
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: A2(_elm_lang$websocket$WebSocket$listen, _user$project$Main$endpoint, _user$project$Main$ServerMessage),
+						_1: {ctor: '[]'}
+					}
 				}
 			}
 		});
@@ -14581,7 +14569,7 @@ var _user$project$Main$main = _elm_lang$html$Html$program(
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"unions":{"Main.Msg":{"args":[],"tags":{"Resize":["Window.Size"],"ToggleBetweenSaturationAndLightness":[],"MouseMove":["Mouse.Position"]}}},"aliases":{"Mouse.Position":{"args":[],"type":"{ x : Int, y : Int }"},"Window.Size":{"args":[],"type":"{ width : Int, height : Int }"}},"message":"Main.Msg"},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"unions":{"Main.Msg":{"args":[],"tags":{"Resize":["Window.Size"],"ServerMessage":["String"],"ToggleBetweenSaturationAndLightness":[],"MouseMove":["Mouse.Position"]}}},"aliases":{"Mouse.Position":{"args":[],"type":"{ x : Int, y : Int }"},"Window.Size":{"args":[],"type":"{ width : Int, height : Int }"}},"message":"Main.Msg"},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])
