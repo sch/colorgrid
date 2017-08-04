@@ -1,21 +1,8 @@
-# Colorgrid
+**Sync a color across as many phones as will fit on a free heroku instance**
 
-**TODO: Add description**
+To build the front-end, run `npm install && npm run build`. To serve the app,
+run `mix deps.get && mix deps.compile && iex -S mix` and visit:
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `colorgrid` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:colorgrid, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/colorgrid](https://hexdocs.pm/colorgrid).
-
+- [localhost:4000/](http://localhost:4000/) for the follower page
+- [localhost:4000/control](http://localhost:4000/control) for the color-select
+  leader page
