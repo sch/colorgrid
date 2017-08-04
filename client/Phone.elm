@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Color exposing (Color)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -25,14 +26,12 @@ echoServer =
 
 
 type alias Model =
-    { input : String
-    , messages : List String
-    }
+    { color : String }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" [], Cmd.none )
+    ( Model "pink", Cmd.none )
 
 
 
@@ -40,22 +39,14 @@ init =
 
 
 type Msg
-    = Input String
-    | Send
-    | NewMessage String
+    = ChangeColor String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg { input, messages } =
+update msg model =
     case msg of
-        Input newInput ->
-            ( Model newInput messages, Cmd.none )
-
-        Send ->
-            ( Model "" messages, WebSocket.send echoServer input )
-
-        NewMessage str ->
-            ( Model input (str :: messages), Cmd.none )
+        ChangeColor newColor ->
+            ( { model | color = newColor }, Cmd.none )
 
 
 
@@ -64,7 +55,7 @@ update msg { input, messages } =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen echoServer NewMessage
+    WebSocket.listen echoServer ChangeColor
 
 
 
@@ -73,13 +64,14 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ input [ onInput Input, value model.input ] []
-        , button [ onClick Send ] [ text "Send" ]
-        , div [] (List.map viewMessage (List.reverse model.messages))
+    div
+        [ style
+            [ ( "background-color", model.color )
+            , ( "position", "fixed" )
+            , ( "top", "0" )
+            , ( "bottom", "0" )
+            , ( "left", "0" )
+            , ( "right", "0" )
+            ]
         ]
-
-
-viewMessage : String -> Html msg
-viewMessage msg =
-    div [] [ text msg ]
+        []

@@ -1,8 +1,9 @@
 {
   "name": "colorgrid",
   "scripts": {
-    "start": "elm-live client/Phone.elm --output priv/static/index.html --pushstate --dir=build --host=0.0.0.0 --port=9000 --debug",
-    "build": "elm-make client/Phone.elm --output priv/static/index.html"
+    "start": "elm-live client/Phone.elm --output priv/static/index.html --debug && elm-live client/Controller.elm --output priv/static/controller.html --debug",
+    "start-controller": "elm-live client/Controller.elm --output priv/static/controller.html --debug",
+    "build": "elm-make client/Phone.elm --output priv/static/index.html && elm-make client/Controller.elm --output priv/static/controller.html"
   },
   "devDependencies": {
     "elm": "^0.18.0",
