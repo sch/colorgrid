@@ -9,6 +9,7 @@ import Mouse
 import Task
 import Phoenix.Socket as Socket exposing (Socket)
 import Phoenix.Push as Sender
+import Phoenix.Channel as Channel
 import Window
 
 
@@ -37,7 +38,6 @@ type alias Model =
     , lightness : Float
     , affecting : YAxis
     , connectedUsers : Int
-    , lastResponse : String
     }
 
 
@@ -57,10 +57,21 @@ init =
             , lightness = 0.5
             , affecting = Saturation
             , connectedUsers = 0
-            , lastResponse = ""
             }
+
+        channel =
+            Channel.init "broadcast"
+
+        ( socket, command ) =
+            Socket.join channel model.socket
+
+        connectCommand =
+            Cmd.map (always Connect) command
+
+        getWindowSize =
+            Task.perform Resize Window.size
     in
-        ( model, Task.perform Resize Window.size )
+        ( { model | socket = socket }, Cmd.batch [ getWindowSize, connectCommand ] )
 
 
 toColor : Model -> Color
@@ -77,6 +88,7 @@ type Msg
     | MouseMove Mouse.Position
     | ToggleBetweenSaturationAndLightness
     | ServerMessage (Socket.Msg Msg)
+    | Connect
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -110,7 +122,7 @@ update msg model =
                     }
 
                 message =
-                    Sender.init "new:color" "rooms:lobby"
+                    Sender.init "color:new" "broadcast"
                         |> Sender.withPayload (colorPayload newModel)
 
                 ( socket, command ) =
@@ -133,7 +145,11 @@ update msg model =
             in
                 ( { model | socket = socket }, Cmd.map ServerMessage command )
 
+        Connect ->
+            ( model, Cmd.none )
 
+
+colorPayload : Model -> Json.Value
 colorPayload model =
     Json.object [ ( "color", Json.string <| colorToCssHsl <| toColor model ) ]
 
@@ -223,7 +239,7 @@ viewHsl model =
 
 
 viewConnections : Model -> Html Msg
-viewConnections { connectedUsers, lastResponse } =
+viewConnections { connectedUsers } =
     let
         message =
             case connectedUsers of
@@ -246,6 +262,4 @@ viewConnections { connectedUsers, lastResponse } =
                 , ( "display", "flex" )
                 ]
             ]
-            [ span [ style [ ( "flex", "1" ) ] ] [ text message ]
-            , text lastResponse
-            ]
+            [ text message ]

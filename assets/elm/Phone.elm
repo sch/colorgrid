@@ -2,7 +2,9 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Json.Decode as Json
 import Phoenix.Socket as Socket exposing (Socket)
+import Phoenix.Channel as Channel
 
 
 main =
@@ -31,7 +33,19 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model (Socket.init endpoint) "black", Cmd.none )
+    let
+        socket =
+            Socket.init endpoint
+                |> Socket.withDebug
+                |> Socket.on "color" "broadcast" ColorMessage
+
+        model =
+            Model socket "black"
+
+        ( socket_, command ) =
+            Socket.join (Channel.init "broadcast") model.socket
+    in
+        ( { model | socket = socket_ }, Cmd.map (always Subscribe) command )
 
 
 
@@ -41,6 +55,8 @@ init =
 type Msg
     = ServerMessage (Socket.Msg Msg)
     | ChangeColor String
+    | Subscribe
+    | ColorMessage Json.Value
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -55,6 +71,17 @@ update msg model =
                     Socket.update msg model.socket
             in
                 ( { model | socket = socket }, Cmd.map ServerMessage command )
+
+        Subscribe ->
+            ( model, Cmd.none )
+
+        ColorMessage message ->
+            let
+                color =
+                    Json.decodeValue (Json.field "color" Json.string) message
+                    |> Result.withDefault "black"
+            in
+                ( { model | color = color }, Cmd.none )
 
 
 

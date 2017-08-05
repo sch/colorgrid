@@ -3,6 +3,8 @@ defmodule ColorgridWeb.UserSocket do
 
   transport :websocket, Phoenix.Transports.WebSocket
 
+  channel "broadcast", ColorgridWeb.ColorChannel
+
   def connect(_params, socket) do
     {:ok, socket}
   end
