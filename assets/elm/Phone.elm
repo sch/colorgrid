@@ -18,7 +18,7 @@ main =
 
 endpoint : String
 endpoint =
-    "ws://localhost:4000/socket/websocket"
+    "ws://evening-atoll-82768.herokuapp.com/socket/websocket"
 
 
 
@@ -79,7 +79,7 @@ update msg model =
             let
                 color =
                     Json.decodeValue (Json.field "color" Json.string) message
-                    |> Result.withDefault "black"
+                    |> Result.withDefault model.color
             in
                 ( { model | color = color }, Cmd.none )
 
