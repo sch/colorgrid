@@ -1,33 +1,9 @@
 defmodule Colorgrid do
   @moduledoc """
-  Documentation for Colorgrid.
+  Colorgrid keeps the contexts that define your domain
+  and business logic.
+
+  Contexts are also responsible for managing your data, regardless
+  if it comes from the database, an external API or others.
   """
-
-  use Application
-
-  def start(_type, _args) do
-    import Supervisor.Spec, warn: false
-
-    children = [
-      Plug.Adapters.Cowboy.child_spec(:http, Colorgrid.Router, [], [
-        dispatch: dispatch(),
-        ip: {0, 0, 0, 0}
-      ])
-    ]
-
-    opts = [strategy: :one_for_one, name: Colorgrid.Supervisor]
-
-    Supervisor.start_link(children, opts)
-  end
-
-  defp dispatch do
-    [
-      {:_, [
-        # route the /ws endpoint to our cowboy websocket handler
-        {"/ws", Colorgrid.SocketHandler, []},
-        # ... but then send everything else to plug
-        {:_, Plug.Adapters.Cowboy.Handler, {Colorgrid.Router, []}}
-      ]}
-    ]
-  end
 end

@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import WebSocket
+import Phoenix.Socket as Socket exposing (Socket)
 
 
 main =
@@ -14,9 +14,9 @@ main =
         }
 
 
-echoServer : String
-echoServer =
-    "ws://localhost:4000/ws"
+endpoint : String
+endpoint =
+    "ws://localhost:4000/socket/websocket"
 
 
 
@@ -24,12 +24,14 @@ echoServer =
 
 
 type alias Model =
-    { color : String }
+    { socket : Socket Msg
+    , color : String
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "pink", Cmd.none )
+    ( Model (Socket.init endpoint) "black", Cmd.none )
 
 
 
@@ -37,7 +39,8 @@ init =
 
 
 type Msg
-    = ChangeColor String
+    = ServerMessage (Socket.Msg Msg)
+    | ChangeColor String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -46,6 +49,13 @@ update msg model =
         ChangeColor newColor ->
             ( { model | color = newColor }, Cmd.none )
 
+        ServerMessage msg ->
+            let
+                ( socket, command ) =
+                    Socket.update msg model.socket
+            in
+                ( { model | socket = socket }, Cmd.map ServerMessage command )
+
 
 
 -- SUBSCRIPTIONS
@@ -53,7 +63,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen echoServer ChangeColor
+    Socket.listen model.socket ServerMessage
 
 
 

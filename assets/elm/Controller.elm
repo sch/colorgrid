@@ -4,9 +4,11 @@ import Color exposing (Color)
 import Color.Convert exposing (colorToHex, colorToCssHsl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Json.Encode as Json
 import Mouse
 import Task
-import WebSocket
+import Phoenix.Socket as Socket exposing (Socket)
+import Phoenix.Push as Sender
 import Window
 
 
@@ -20,7 +22,7 @@ main =
 
 
 endpoint =
-    "ws://localhost:4000/ws"
+    "ws://localhost:4000/socket/websocket"
 
 
 
@@ -28,7 +30,8 @@ endpoint =
 
 
 type alias Model =
-    { window : Window.Size
+    { socket : Socket Msg
+    , window : Window.Size
     , hue : Float
     , saturation : Float
     , lightness : Float
@@ -47,7 +50,8 @@ init : ( Model, Cmd Msg )
 init =
     let
         model =
-            { window = { width = 0, height = 0 }
+            { socket = Socket.init endpoint
+            , window = { width = 0, height = 0 }
             , hue = 0
             , saturation = 0.5
             , lightness = 0.5
@@ -72,7 +76,7 @@ type Msg
     = Resize Window.Size
     | MouseMove Mouse.Position
     | ToggleBetweenSaturationAndLightness
-    | ServerMessage String
+    | ServerMessage (Socket.Msg Msg)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -105,10 +109,14 @@ update msg model =
                         , saturation = saturation
                     }
 
-                command =
-                    WebSocket.send endpoint (colorMessage newModel)
+                message =
+                    Sender.init "new:color" "rooms:lobby"
+                        |> Sender.withPayload (colorPayload newModel)
+
+                ( socket, command ) =
+                    Socket.push message model.socket
             in
-                ( newModel, command )
+                ( { newModel | socket = socket }, Cmd.map ServerMessage command )
 
         ToggleBetweenSaturationAndLightness ->
             case model.affecting of
@@ -118,12 +126,16 @@ update msg model =
                 Lightness ->
                     ( { model | affecting = Saturation }, Cmd.none )
 
-        ServerMessage string ->
-            ( { model | lastResponse = string }, Cmd.none )
+        ServerMessage message ->
+            let
+                ( socket, command ) =
+                    Socket.update message model.socket
+            in
+                ( { model | socket = socket }, Cmd.map ServerMessage command )
 
 
-colorMessage model =
-    "color:" ++ (colorToCssHsl <| toColor model)
+colorPayload model =
+    Json.object [ ( "color", Json.string <| colorToCssHsl <| toColor model ) ]
 
 
 
@@ -136,7 +148,7 @@ subscriptions model =
         [ Window.resizes Resize
         , Mouse.moves MouseMove
         , Mouse.clicks (always ToggleBetweenSaturationAndLightness)
-        , WebSocket.listen endpoint ServerMessage
+        , Socket.listen model.socket ServerMessage
         ]
 
 
