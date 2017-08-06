@@ -23,7 +23,7 @@ main =
 
 
 endpoint =
-    "ws://evening-atoll-82768.herokuapp.com/socket/websocket"
+    "wss://evening-atoll-82768.herokuapp.com/socket/websocket"
 
 
 
