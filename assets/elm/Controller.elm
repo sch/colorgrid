@@ -37,7 +37,7 @@ type alias Model =
     , saturation : Float
     , lightness : Float
     , affecting : YAxis
-    , connectedUsers : Int
+    , connectedUsers : Maybe Int
     }
 
 
@@ -56,7 +56,7 @@ init =
             , saturation = 0.5
             , lightness = 0.5
             , affecting = Saturation
-            , connectedUsers = 0
+            , connectedUsers = Nothing
             }
 
         channel =
@@ -207,8 +207,8 @@ quote str =
 
 view : Model -> Html Msg
 view model =
-    div
-        [ style
+    let
+        styles = 
             [ ( "background-color", colorToHex <| toColor model )
             , ( "position", "absolute" )
             , ( "top", "0" )
@@ -220,8 +220,13 @@ view model =
             , ( "justify-content", "center" )
             , ( "font-family", systemFonts )
             ]
-        ]
-        [ viewConnections model, viewHsl model ]
+        children = case model.connectedUsers of
+            Just count ->
+                [ viewConnections count, viewHsl model ]
+            Nothing ->
+                [ viewHsl model ]
+    in
+    div [ style styles ] children
 
 
 viewHsl : Model -> Html Msg
@@ -238,8 +243,8 @@ viewHsl model =
         [ text <| colorToCssHsl <| toColor model ]
 
 
-viewConnections : Model -> Html Msg
-viewConnections { connectedUsers } =
+viewConnections : Int -> Html Msg
+viewConnections connectedUsers =
     let
         message =
             case connectedUsers of
