@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# script/bootstrap: Install dependencies
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+mix deps.get
+cd assets && npm install

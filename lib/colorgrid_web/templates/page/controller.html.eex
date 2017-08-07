@@ -1,0 +1,2 @@
+<script src="<%= static_path(@conn, "/js/controller.js") %>"></script>
+<script type="text/javascript">Elm.Main.fullscreen("<%= socket_url(@conn) %>")</script>

@@ -4,14 +4,17 @@ import Color exposing (Color)
 import Color.Convert exposing (colorToHex, colorToCssHsl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Json.Encode as Json
 import Mouse
 import Task
-import WebSocket
+import Phoenix.Socket as Socket exposing (Socket)
+import Phoenix.Push as Sender
+import Phoenix.Channel as Channel
 import Window
 
 
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update
@@ -19,22 +22,18 @@ main =
         }
 
 
-endpoint =
-    "ws://localhost:4000/ws"
-
-
 
 -- MODEL
 
 
 type alias Model =
-    { window : Window.Size
+    { socket : Socket Msg
+    , window : Window.Size
     , hue : Float
     , saturation : Float
     , lightness : Float
     , affecting : YAxis
-    , connectedUsers : Int
-    , lastResponse : String
+    , connectedUsers : Maybe Int
     }
 
 
@@ -43,20 +42,32 @@ type YAxis
     | Lightness
 
 
-init : ( Model, Cmd Msg )
-init =
+init : String -> ( Model, Cmd Msg )
+init endpoint =
     let
         model =
-            { window = { width = 0, height = 0 }
+            { socket = Socket.init endpoint
+            , window = { width = 0, height = 0 }
             , hue = 0
             , saturation = 0.5
             , lightness = 0.5
             , affecting = Saturation
-            , connectedUsers = 0
-            , lastResponse = ""
+            , connectedUsers = Nothing
             }
+
+        channel =
+            Channel.init "broadcast"
+
+        ( socket, command ) =
+            Socket.join channel model.socket
+
+        connectCommand =
+            Cmd.map (always Connect) command
+
+        getWindowSize =
+            Task.perform Resize Window.size
     in
-        ( model, Task.perform Resize Window.size )
+        ( { model | socket = socket }, Cmd.batch [ getWindowSize, connectCommand ] )
 
 
 toColor : Model -> Color
@@ -72,7 +83,8 @@ type Msg
     = Resize Window.Size
     | MouseMove Mouse.Position
     | ToggleBetweenSaturationAndLightness
-    | ServerMessage String
+    | ServerMessage (Socket.Msg Msg)
+    | Connect
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -105,10 +117,14 @@ update msg model =
                         , saturation = saturation
                     }
 
-                command =
-                    WebSocket.send endpoint (colorMessage newModel)
+                message =
+                    Sender.init "color:new" "broadcast"
+                        |> Sender.withPayload (colorPayload newModel)
+
+                ( socket, command ) =
+                    Socket.push message model.socket
             in
-                ( newModel, command )
+                ( { newModel | socket = socket }, Cmd.map ServerMessage command )
 
         ToggleBetweenSaturationAndLightness ->
             case model.affecting of
@@ -118,12 +134,20 @@ update msg model =
                 Lightness ->
                     ( { model | affecting = Saturation }, Cmd.none )
 
-        ServerMessage string ->
-            ( { model | lastResponse = string }, Cmd.none )
+        ServerMessage message ->
+            let
+                ( socket, command ) =
+                    Socket.update message model.socket
+            in
+                ( { model | socket = socket }, Cmd.map ServerMessage command )
+
+        Connect ->
+            ( model, Cmd.none )
 
 
-colorMessage model =
-    "color:" ++ (colorToCssHsl <| toColor model)
+colorPayload : Model -> Json.Value
+colorPayload model =
+    Json.object [ ( "color", Json.string <| colorToCssHsl <| toColor model ) ]
 
 
 
@@ -136,7 +160,7 @@ subscriptions model =
         [ Window.resizes Resize
         , Mouse.moves MouseMove
         , Mouse.clicks (always ToggleBetweenSaturationAndLightness)
-        , WebSocket.listen endpoint ServerMessage
+        , Socket.listen model.socket ServerMessage
         ]
 
 
@@ -179,8 +203,8 @@ quote str =
 
 view : Model -> Html Msg
 view model =
-    div
-        [ style
+    let
+        styles =
             [ ( "background-color", colorToHex <| toColor model )
             , ( "position", "absolute" )
             , ( "top", "0" )
@@ -192,8 +216,16 @@ view model =
             , ( "justify-content", "center" )
             , ( "font-family", systemFonts )
             ]
-        ]
-        [ viewConnections model, viewHsl model ]
+
+        children =
+            case model.connectedUsers of
+                Just count ->
+                    [ viewConnections count, viewHsl model ]
+
+                Nothing ->
+                    [ viewHsl model ]
+    in
+        div [ style styles ] children
 
 
 viewHsl : Model -> Html Msg
@@ -210,8 +242,8 @@ viewHsl model =
         [ text <| colorToCssHsl <| toColor model ]
 
 
-viewConnections : Model -> Html Msg
-viewConnections { connectedUsers, lastResponse } =
+viewConnections : Int -> Html Msg
+viewConnections connectedUsers =
     let
         message =
             case connectedUsers of
@@ -234,6 +266,4 @@ viewConnections { connectedUsers, lastResponse } =
                 , ( "display", "flex" )
                 ]
             ]
-            [ span [ style [ ( "flex", "1" ) ] ] [ text message ]
-            , text lastResponse
-            ]
+            [ text message ]
