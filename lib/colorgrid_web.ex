@@ -40,6 +40,7 @@ defmodule ColorgridWeb do
       import ColorgridWeb.Router.Helpers
       import ColorgridWeb.ErrorHelpers
       import ColorgridWeb.Gettext
+      import ColorgridWeb.SocketHelpers
     end
   end
 

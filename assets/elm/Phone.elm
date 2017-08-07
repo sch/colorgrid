@@ -8,18 +8,12 @@ import Phoenix.Channel as Channel
 
 
 main =
-    Html.program
+    Html.programWithFlags 
         { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
         }
-
-
-endpoint : String
-endpoint =
-    "wss://evening-atoll-82768.herokuapp.com/socket/websocket"
-
 
 
 -- MODEL
@@ -31,8 +25,8 @@ type alias Model =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : String -> ( Model, Cmd Msg )
+init endpoint =
     let
         socket =
             Socket.init endpoint
