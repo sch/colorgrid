@@ -8,12 +8,13 @@ import Phoenix.Channel as Channel
 
 
 main =
-    Html.programWithFlags 
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
         }
+
 
 
 -- MODEL
@@ -73,7 +74,7 @@ update msg model =
             let
                 color =
                     Json.decodeValue (Json.field "color" Json.string) message
-                    |> Result.withDefault model.color
+                        |> Result.withDefault model.color
             in
                 ( { model | color = color }, Cmd.none )
 

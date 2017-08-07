@@ -22,6 +22,7 @@ main =
         }
 
 
+
 -- MODEL
 
 
@@ -203,7 +204,7 @@ quote str =
 view : Model -> Html Msg
 view model =
     let
-        styles = 
+        styles =
             [ ( "background-color", colorToHex <| toColor model )
             , ( "position", "absolute" )
             , ( "top", "0" )
@@ -215,13 +216,16 @@ view model =
             , ( "justify-content", "center" )
             , ( "font-family", systemFonts )
             ]
-        children = case model.connectedUsers of
-            Just count ->
-                [ viewConnections count, viewHsl model ]
-            Nothing ->
-                [ viewHsl model ]
+
+        children =
+            case model.connectedUsers of
+                Just count ->
+                    [ viewConnections count, viewHsl model ]
+
+                Nothing ->
+                    [ viewHsl model ]
     in
-    div [ style styles ] children
+        div [ style styles ] children
 
 
 viewHsl : Model -> Html Msg
