@@ -6,7 +6,7 @@ defmodule ColorgridWeb.SocketHelpers do
   def socket_url(socket) do
     ColorgridWeb.Endpoint.url
     |> URI.parse
-    |> Map.update!(:scheme, fn scheme -> websocket_scheme(scheme) end)
+    |> Map.update!(:scheme, &websocket_scheme/1)
     |> Map.put(:path, endpoint_for(socket) <> "/websocket")
     |> URI.to_string
   end
@@ -17,8 +17,7 @@ defmodule ColorgridWeb.SocketHelpers do
 
   defp endpoint_for(socket) do
     ColorgridWeb.Endpoint.__sockets__
-    |> Enum.filter(fn {_, sock} -> sock == socket end)
-    |> Enum.at(0)
+    |> Enum.find(fn {_, sock} -> sock == socket end)
     |> elem(0)
   end
 end
