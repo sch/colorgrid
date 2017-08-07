@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# script/server: Run the development server
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+script/bootstrap
+
+iex -S mix phx.server
