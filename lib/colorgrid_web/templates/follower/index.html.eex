@@ -1,2 +1,2 @@
-<script src="<%= static_path(@conn, "/js/controller.js") %>"></script>
+<script src="<%= static_path(@conn, "/js/follower.js") %>"></script>
 <script type="text/javascript">Elm.Main.fullscreen("<%= socket_url(ColorgridWeb.UserSocket) %>")</script>

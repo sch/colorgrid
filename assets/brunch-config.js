@@ -1,5 +1,8 @@
 exports.config = {
   files: {
+    javascripts: {
+      joinTo: "js/app.js"
+    },
     stylesheets: {
       joinTo: "css/app.css"
     },
@@ -18,12 +21,8 @@ exports.config = {
   },
 
   plugins: {
-    babel: {
-      ignore: [/vendor/]
-    },
-
     elmBrunch: {
-      mainModules: ["elm/Phone.elm", "elm/Controller.elm"]
+      mainModules: ["elm/Leader.elm", "elm/Follower.elm"]
     }
   },
 

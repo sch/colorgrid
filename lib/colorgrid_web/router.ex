@@ -12,7 +12,7 @@ defmodule ColorgridWeb.Router do
   scope "/", ColorgridWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
-    get "/control", PageController, :control
+    get "/", FollowerController, :index
+    get "/control", LeaderController, :index
   end
 end
