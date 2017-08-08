@@ -3,8 +3,7 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Json.Decode as Json
-import Phoenix.Socket as Socket exposing (Socket)
-import Phoenix.Channel as Channel
+import ColorSocket
 
 
 main =
@@ -21,7 +20,7 @@ main =
 
 
 type alias Model =
-    { socket : Socket Msg
+    { socket : ColorSocket.State
     , color : String
     }
 
@@ -29,18 +28,10 @@ type alias Model =
 init : String -> ( Model, Cmd Msg )
 init endpoint =
     let
-        socket =
-            Socket.init endpoint
-                |> Socket.withDebug
-                |> Socket.on "color" "broadcast" ColorMessage
-
-        model =
-            Model socket "black"
-
-        ( socket_, command ) =
-            Socket.join (Channel.init "broadcast") model.socket
+        ( socket, command ) =
+            ColorSocket.init endpoint
     in
-        ( { model | socket = socket_ }, Cmd.map (always Subscribe) command )
+        ( Model socket "black", Cmd.map SocketMessage command )
 
 
 
@@ -48,10 +39,8 @@ init endpoint =
 
 
 type Msg
-    = ServerMessage (Socket.Msg Msg)
+    = SocketMessage (ColorSocket.Msg Msg)
     | ChangeColor String
-    | Subscribe
-    | ColorMessage Json.Value
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -60,23 +49,12 @@ update msg model =
         ChangeColor newColor ->
             ( { model | color = newColor }, Cmd.none )
 
-        ServerMessage msg ->
+        SocketMessage msg ->
             let
                 ( socket, command ) =
-                    Socket.update msg model.socket
+                    ColorSocket.update msg model.socket
             in
-                ( { model | socket = socket }, Cmd.map ServerMessage command )
-
-        Subscribe ->
-            ( model, Cmd.none )
-
-        ColorMessage message ->
-            let
-                color =
-                    Json.decodeValue (Json.field "color" Json.string) message
-                        |> Result.withDefault model.color
-            in
-                ( { model | color = color }, Cmd.none )
+                ( { model | socket = socket }, Cmd.map SocketMessage command )
 
 
 
@@ -85,7 +63,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Socket.listen model.socket ServerMessage
+    ColorSocket.changes model.socket ChangeColor
 
 
 
